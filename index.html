@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vagner Leitte | Desenvolvedor Frontend Sênior</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony -->
+    <!-- Application Structure Plan: A single-page portfolio designed for non-linear exploration. It features a sticky navigation bar for quick access to key sections: a hero section for immediate impact, an interactive timeline for exploring professional history, a skills section with a radar chart for a visual summary of competencies, and a clear contact footer. This structure was chosen to allow recruiters to quickly find the information they need, moving away from the linear, static format of a traditional CV and providing a more engaging user experience. -->
+    <!-- Visualization & Content Choices: 
+        - Professional Experience -> Goal: Compare/Explore -> Viz: Interactive vertical timeline with a dynamic detail view -> Interaction: On click, JS updates a content panel with the selected job's details -> Justification: Breaks down a long history into digestible parts, encourages user interaction, and keeps the interface clean.
+        - Technical Skills -> Goal: Organize/Compare -> Viz: Radar Chart (Chart.js) -> Interaction: Hover tooltips provide specific skill names -> Justification: Offers a quick, holistic "fingerprint" of the candidate's technical strengths, highlighting expertise areas more effectively than a simple list.
+        - Summary/Differentials -> Goal: Inform -> Viz: Structured text blocks -> Interaction: None -> Justification: Clear, scannable text is best for conveying narrative information.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .nav-link {
+            transition: color 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #007bff;
+        }
+        .timeline-item {
+            border-left: 3px solid #dee2e6;
+            transition: border-color 0.3s;
+        }
+        .timeline-item.active {
+            border-left-color: #007bff;
+        }
+        .timeline-item-dot {
+            position: absolute;
+            left: -9px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #dee2e6;
+            border: 3px solid #f8f9fa;
+            transition: background-color 0.3s;
+        }
+        .timeline-item.active .timeline-item-dot {
+            background-color: #007bff;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-lg fixed top-0 left-0 right-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex-shrink-0">
+                    <a href="#home" class="text-xl font-bold text-gray-800">Vagner Leitte</a>
+                </div>
+                <div class="hidden md:block">
+                    <nav class="ml-10 flex items-baseline space-x-4">
+                        <a href="#journey" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Jornada</a>
+                        <a href="#skills" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Competências</a>
+                        <a href="#about" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Sobre</a>
+                        <a href="#contact" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-600">Contato</a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="pt-24 pb-16 bg-white">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">Desenvolvedor Frontend Sênior</h1>
+                <p class="mt-4 text-lg md:text-xl text-gray-600">Construindo pontes entre Web, Mobile e Negócio com código limpo e escalável.</p>
+                <p class="mt-2 text-md text-gray-500">Angular, React, Webviews | Explorando Swift com propósito.</p>
+            </div>
+        </section>
+
+        <section id="journey" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">Jornada Profissional</h2>
+                    <p class="mt-2 text-lg text-gray-600">Navegue pela minha trajetória. Clique em uma empresa para ver os detalhes e projetos.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                    <div class="col-span-1">
+                        <div id="timeline-nav" class="relative">
+                        </div>
+                    </div>
+                    <div class="col-span-1 md:col-span-2 bg-white p-6 md:p-8 rounded-xl shadow-lg">
+                        <div id="experience-details">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">Principais Competências</h2>
+                    <p class="mt-2 text-lg text-gray-600">Uma visão geral das minhas áreas de expertise técnica.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="grid grid-cols-2 gap-8">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-gray-800">Linguagens & Frameworks</h3>
+                                <ul class="space-y-1 text-gray-600">
+                                    <li>JavaScript & TypeScript</li>
+                                    <li>Angular & React</li>
+                                    <li>Next.js</li>
+                                    <li>HTML & CSS</li>
+                                    <li>Swift (em progresso)</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-gray-800">Arquitetura & Conceitos</h3>
+                                <ul class="space-y-1 text-gray-600">
+                                    <li>Micro Frontends</li>
+                                    <li>Module Federation</li>
+                                    <li>Webviews</li>
+                                    <li>CI/CD</li>
+                                    <li>Design Universal & Acessibilidade</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-gray-800">Ferramentas & Plataformas</h3>
+                                <ul class="space-y-1 text-gray-600">
+                                    <li>Git & GitHub</li>
+                                    <li>Jest & Cypress</li>
+                                    <li>Docker</li>
+                                    <li>Contentstack</li>
+                                    <li>Figma</li>
+                                </ul>
+                            </div>
+                             <div>
+                                <h3 class="text-lg font-semibold mb-2 text-gray-800">Formação Acadêmica</h3>
+                                <ul class="space-y-1 text-gray-600">
+                                    <li>ADS - Anhembi Morumbi (2024)</li>
+                                    <li>Técnico em Informática - ETEC (2012)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="about" class="py-20">
+             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold tracking-tight text-gray-900">Sobre Mim</h2>
+                </div>
+                <div class="bg-white p-8 rounded-xl shadow-lg space-y-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Resumo Profissional</h3>
+                        <p class="text-gray-600 leading-relaxed">Desenvolvedor Frontend Sênior com mais de 15 anos de experiência e sólida vivência em Angular, React, arquitetura de micro frontends e integração com mobile via Webviews. Atuei em projetos críticos para grandes empresas como Itaú, Embraer e Santander, entregando interfaces performáticas, seguras e centradas no usuário. Atualmente, estou ampliando minha atuação para desenvolvimento iOS nativo com Swift, buscando unir o melhor da web com a performance do mobile nativo para resolver problemas complexos com soluções simples.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Diferenciais</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li>Experiência real com ambientes regulados (banco, governo, indústria).</li>
+                            <li>Visão técnica e de produto: entrega de ponta a ponta, da arquitetura ao deploy.</li>
+                            <li>Capacidade de conectar front web com mobile via Webviews e arquitetura compartilhada.</li>
+                            <li>Profissional PCD com olhar ativo para acessibilidade, inclusão e design universal.</li>
+                        </ul>
+                    </div>
+                </div>
+             </div>
+        </section>
+
+    </main>
+
+    <footer id="contact" class="bg-gray-800 text-white">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-2xl font-bold">Vamos conversar?</h2>
+            <p class="mt-2 text-gray-400">Estou disponível para novas oportunidades e desafios.</p>
+            <div class="mt-6 flex justify-center items-center space-x-6">
+                <a href="mailto:vagner.leite.silva@gmail.com" class="text-gray-300 hover:text-white transition">vagner.leite.silva@gmail.com</a>
+                <span>&bull;</span>
+                <a href="https://www.linkedin.com/in/vagnerleitte" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white transition">LinkedIn</a>
+                <span>&bull;</span>
+                <a href="https://github.com/vagnerleitte" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white transition">GitHub</a>
+            </div>
+             <p class="mt-8 text-xs text-gray-500">&copy; 2025 Vagner Leitte. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const experiences = [
+                {
+                    company: "Zup Innovation (Itaú)",
+                    role: "Desenvolvedor Frontend",
+                    period: "Jul/2023 – Jul/2025",
+                    details: [
+                        "Referência técnica em Webviews e Micro Frontends aplicados ao ecossistema bancário do Itaú.",
+                        "Redução do time-to-market de squads com estratégias baseadas em Module Federation.",
+                        "Colaboração na arquitetura de frontends desacoplados em apps nativos iOS/Android.",
+                        "Reestruturação da Central de Ajuda do Internet Banking PF com criptografia ponta a ponta.",
+                        "Criação de biblioteca de componentes Angular e microfrontend para governança de FAQs e chat.",
+                    ]
+                },
+                {
+                    company: "Sólides Tecnologia",
+                    role: "Senior Frontend Engineer",
+                    period: "Mai/2022 – Jan/2023",
+                    details: [
+                        "Liderança de iniciativas técnicas em arquitetura de Micro Frontends (React e Single-SPA).",
+                        "Contribuição para a padronização da identidade visual dos produtos, melhorando performance e governança.",
+                        "Concepção e desenvolvimento inicial da plataforma interna Dex para observabilidade de aplicações.",
+                        "Criação e evolução de uma biblioteca de componentes com design system unificado.",
+                        "Redução no tamanho dos bundles e melhoria na performance geral das aplicações."
+                    ]
+                },
+                {
+                    company: "act digital (PCD)",
+                    role: "Senior Frontend Engineer",
+                    period: "Mar/2020 – Mar/2022",
+                    details: [
+                        "<strong>Embraer:</strong> Construção de ferramenta de análise de risco para venda de aeronaves, integrada ao CRM Salesforce.",
+                        "<strong>Banco BMG:</strong> Colaboração no desenvolvimento do primeiro produto digital PJ com React e micro frontends.",
+                        "Estruturação da arquitetura frontend baseada em Micro Frontends com React e TypeScript.",
+                        "Criação de biblioteca de componentes com identidade visual da nova marca (storybook + testes).",
+                    ]
+                },
+                {
+                    company: "IBM (Santander)",
+                    role: "Frontend Engineer",
+                    period: "Dez/2017 – Set/2019",
+                    details: [
+                        "Desenvolvimento de painel antifraude em Angular para configuração de sistemas bancários.",
+                        "Migração da esteira de testes de PhantomJS para Jest, modernizando o processo.",
+                        "Atuação em modelo ágil (Scrum) com foco em entrega contínua e integração.",
+                    ]
+                },
+                {
+                    company: "Catho",
+                    role: "Desenvolvedor Frontend",
+                    period: "Fev/2016 – Nov/2016",
+                    details: [
+                        "Reescrita completa do front-end do Guia de Profissões, com foco em performance e UX.",
+                        "Colaboração direta com UX para alinhar expectativas, limitações técnicas e experiência do usuário.",
+                        "Primeiro contato profissional com React e metodologias ágeis (Kanban e Scrum).",
+                    ]
+                },
+                 {
+                    company: "Início da Carreira",
+                    role: "Web Jr. / Estágio",
+                    period: "2011 – 2013",
+                    details: [
+                        "<strong>Novosis:</strong> Criação e sustentação da estrutura técnica de portais de transparência para prefeituras.",
+                        "<strong>Fundação Vanzolini:</strong> Suporte e manutenção de sistemas de videoconferência educacional.",
+                        "Desenvolvimento de base sólida em resolução de problemas, autonomia e comunicação com usuários.",
+                    ]
+                }
+            ];
+
+            const timelineNav = document.getElementById('timeline-nav');
+            const detailsContainer = document.getElementById('experience-details');
+
+            function displayExperience(index) {
+                const exp = experiences[index];
+                detailsContainer.innerHTML = `
+                    <h3 class="text-2xl font-bold text-gray-900">${exp.company}</h3>
+                    <p class="text-md font-medium text-blue-600 mt-1">${exp.role}</p>
+                    <p class="text-sm text-gray-500 mb-4">${exp.period}</p>
+                    <ul class="space-y-3 text-gray-700 list-disc list-inside">
+                        ${exp.details.map(d => `<li>${d}</li>`).join('')}
+                    </ul>
+                `;
+                
+                document.querySelectorAll('.timeline-item').forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+
+            experiences.forEach((exp, index) => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item relative pl-8 pb-8 cursor-pointer';
+                item.innerHTML = `
+                    <div class="timeline-item-dot"></div>
+                    <h4 class="font-semibold text-gray-800">${exp.company}</h4>
+                    <p class="text-sm text-gray-500">${exp.period}</p>
+                `;
+                item.addEventListener('click', () => displayExperience(index));
+                timelineNav.appendChild(item);
+            });
+            
+            // Remove bottom padding from last timeline item
+            if(timelineNav.lastChild) {
+                timelineNav.lastChild.classList.remove('pb-8');
+            }
+            
+            displayExperience(0);
+            
+            const ctx = document.getElementById('skillsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['Frontend (Angular/React)', 'Arquitetura (Micro Frontends)', 'Integração (Webviews)', 'Testes (Jest/Cypress)', 'Liderança Técnica', 'Cloud/CI/CD'],
+                    datasets: [{
+                        label: 'Nível de Experiência',
+                        data: [9, 8, 8.5, 7, 7.5, 6.5],
+                        backgroundColor: 'rgba(0, 123, 255, 0.2)',
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(0, 123, 255, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(0, 123, 255, 1)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                },
+                                color: '#343a40'
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: '#6c757d',
+                                stepSize: 2
+                            },
+                            min: 0,
+                            max: 10
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
